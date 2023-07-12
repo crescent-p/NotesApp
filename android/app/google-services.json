@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "493430618844",
+    "project_id": "friends-madeby-cp",
+    "storage_bucket": "friends-madeby-cp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:493430618844:android:5d7c8c4d5409a8bb879219",
+        "android_client_info": {
+          "package_name": "com.crescent.friends2"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "493430618844-iv8u0nllm6i2ev5ihoqpc3i51po2clvo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA5BYygYsEMmmheS_Ds76BlM7-mYHoan-o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "493430618844-iv8u0nllm6i2ev5ihoqpc3i51po2clvo.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "493430618844-b2oebvu6eckmlc6463p74hn9ovfo6rso.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.crescent.friends2.RunnerTests"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
