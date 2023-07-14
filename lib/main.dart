@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'Pages/verifyemail.dart';
 import 'firebase_options.dart';
 import 'Pages/login.dart';
 import 'Pages/register.dart';
@@ -8,7 +9,13 @@ import 'Pages/register.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(
-    const MaterialApp(home: HomePage()),
+    MaterialApp(
+      home: HomePage(),
+      routes: {
+        '/login': (context) => LoginPage(),
+        '/register': (context) => Register(),
+      },
+    ),
   );
 }
 
@@ -26,23 +33,36 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text('Home'),
       ),
-      body: FutureBuilder(
-        future: Firebase.initializeApp(
-          options: DefaultFirebaseOptions.currentPlatform,
-        ),
-        builder: (context, snapshot) {
-          switch (snapshot.connectionState) {
-            case ConnectionState.done:
-            final user = FirebaseAuth.instance.currentUser;
-            if(user?.emailVerified??false)
-            print('verified');
-            else
-            print('not verified');
-              return Text("done");
-            default:
-              return Text("loading");
-          }
-        },
+      body: Column(
+        children: [
+          TextButton(
+              onPressed: () {
+                Navigator.pushNamedAndRemoveUntil(
+                    context, '/register', (route) => false);
+              },
+              child: const Text('NEW here? Register here')),
+          FutureBuilder(
+            future: Firebase.initializeApp(
+              options: DefaultFirebaseOptions.currentPlatform,
+            ),
+            builder: (context, snapshot) {
+              switch (snapshot.connectionState) {
+                case ConnectionState.done:
+                  final user = FirebaseAuth.instance.currentUser;
+                  if (user?.emailVerified ?? false)
+                    print('verified');
+                  else {
+                    print('not verified');
+                    return VerficationPage();
+                  }
+
+                  return Text("done");
+                default:
+                  return Text("loading");
+              }
+            },
+          ),
+        ],
       ),
     );
   }
