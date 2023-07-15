@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import '../dialog_box/show_login_error.dart';
 import '../firebase_options.dart';
 
 class LoginPage extends StatefulWidget {
@@ -32,7 +33,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Login Page')),
+      appBar: AppBar(title: const Text('Login Page')),
       body: Column(
         children: [
           FutureBuilder(
@@ -62,7 +63,6 @@ class _LoginPageState extends State<LoginPage> {
                           keyboardType: TextInputType.visiblePassword,
                           obscureText: true,
                           textAlign: TextAlign.center,
-                          // controller: _password,
                           decoration: const InputDecoration(
                               hintText: 'Enter your soul or die'),
                         ),
@@ -71,15 +71,26 @@ class _LoginPageState extends State<LoginPage> {
                             final email = _username.text;
                             final password = _password.text;
                             try {
-                              final userdetails = await FirebaseAuth.instance
+                              await FirebaseAuth.instance
                                   .signInWithEmailAndPassword(
-                                      email: email, password: password);
-                              print(userdetails);
-                            } on FirebaseAuthException catch (e) {
-                              if (e.code == 'wrong-password')
-                                print("The given password was wrong");
-                              if (e.code == 'user-not-found')
-                                print("The given UserName is not registered!");
+                                      email: email, password: password)
+                                  .then((value) {
+                                final person =
+                                    FirebaseAuth.instance.currentUser;
+                                if (person?.emailVerified ?? false) {
+                                  Navigator.pushNamedAndRemoveUntil(
+                                      context, '/main', (route) => false);
+                                } else {
+                                  Navigator.pushNamedAndRemoveUntil(
+                                      context, '/verify', (route) => false);
+                                }
+                              });
+                            } catch (e) {
+                              showLoginError(
+                                context,
+                                //#TODO replace text with widget
+                                "Error: ${e.toString()}",
+                              );
                             }
                           },
                           child: const Text('Login'),
@@ -97,7 +108,7 @@ class _LoginPageState extends State<LoginPage> {
                 Navigator.pushNamedAndRemoveUntil(
                     context, '/register', (route) => false);
               },
-              child: Text('Already Registered? Login here'))
+              child: const Text('Not Registerd? Register here'))
         ],
       ),
     );

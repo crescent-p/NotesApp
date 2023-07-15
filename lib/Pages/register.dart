@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:friends2/consts/routes.dart';
+import '../dialog_box/show_login_error.dart';
 import '../firebase_options.dart';
 
 class Register extends StatefulWidget {
@@ -73,10 +75,13 @@ class _RegisterState extends State<Register> {
                             final userdetails = await FirebaseAuth.instance
                                 .createUserWithEmailAndPassword(
                                     email: email, password: password);
+                            FirebaseAuth.instance.currentUser
+                                ?.sendEmailVerification();
+                            Navigator.pushNamed(context, verifyView);
 
                             print(userdetails);
                           } catch (e) {
-                            print(e.runtimeType);
+                            showLoginError(context, e.toString());
                           }
                         },
                         child: const Text('Register'),
