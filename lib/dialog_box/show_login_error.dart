@@ -1,11 +1,9 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 Future<void> showLoginError(
   BuildContext context,
   String error,
 ) async {
-  print(error);
   return showDialog<void>(
     context: context,
     builder: (context) {

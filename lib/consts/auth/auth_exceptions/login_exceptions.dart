@@ -1,5 +1,7 @@
 //Login errors
 
+
+
 class UserNotFoundAuthException implements Exception {}
 
 class PasswordNotFoundAuthException implements Exception {}
@@ -11,6 +13,8 @@ class WeakPasswordAuthException implements Exception {}
 class EmailAlreadyInUseAuthException implements Exception {}
 
 class InvalidEmailAuthException implements Exception {}
+
+class WrongPasswordAuthException implements Exception {}
 
 //Generic Errors
 

@@ -1,7 +1,8 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:friends2/consts/routes.dart';
+
+import '../consts/auth/auth_exceptions/auth_services.dart';
 
 class VerficationPage extends StatefulWidget {
   const VerficationPage({super.key});
@@ -13,6 +14,7 @@ class VerficationPage extends StatefulWidget {
 class _VerficationPageState extends State<VerficationPage> {
   @override
   Widget build(BuildContext context) {
+    AuthServices.firebase().initialize();
     return Scaffold(
       appBar: AppBar(title: const Text('Verify Email!')),
       body: Column(
@@ -22,13 +24,12 @@ class _VerficationPageState extends State<VerficationPage> {
               "If you haven't received an email click the button below."),
           TextButton(
               onPressed: () {
-                final user = FirebaseAuth.instance.currentUser;
-                user?.sendEmailVerification();
+                AuthServices.firebase().sendEmailVerificaton();
               },
               child: const Text('Resend Email Verification')),
           TextButton(
             onPressed: () {
-              FirebaseAuth.instance.signOut();
+              AuthServices.firebase().logOut();
               Navigator.pushNamedAndRemoveUntil(
                   context, registerView, (route) => false);
             },

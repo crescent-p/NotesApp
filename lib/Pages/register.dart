@@ -1,7 +1,6 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:friends2/consts/routes.dart';
+import '../consts/auth/auth_exceptions/auth_services.dart';
 import '../dialog_box/show_login_error.dart';
 import '../firebase_options.dart';
 
@@ -38,9 +37,7 @@ class _RegisterState extends State<Register> {
       body: Column(
         children: [
           FutureBuilder(
-            future: Firebase.initializeApp(
-              options: DefaultFirebaseOptions.currentPlatform,
-            ),
+            future: AuthServices.firebase().initialize(),
             builder: (context, snapshot) {
               switch (snapshot.connectionState) {
                 case ConnectionState.done:
@@ -72,14 +69,11 @@ class _RegisterState extends State<Register> {
                           final email = _username.text;
                           final password = _password.text;
                           try {
-                            final userdetails = await FirebaseAuth.instance
-                                .createUserWithEmailAndPassword(
-                                    email: email, password: password);
-                            FirebaseAuth.instance.currentUser
-                                ?.sendEmailVerification();
+                            await AuthServices.firebase()
+                                .createUser(email: email, password: password);
+                            await AuthServices.firebase()
+                                .sendEmailVerificaton();
                             Navigator.pushNamed(context, verifyView);
-
-                            print(userdetails);
                           } catch (e) {
                             showLoginError(context, e.toString());
                           }
@@ -96,7 +90,7 @@ class _RegisterState extends State<Register> {
           TextButton(
               onPressed: () {
                 Navigator.pushNamedAndRemoveUntil(
-                    context, '/login', (route) => false);
+                    context, loginView, (route) => false);
               },
               child: const Text('Login Here!'))
         ],

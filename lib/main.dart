@@ -1,22 +1,20 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:friends2/consts/auth/auth_exceptions/auth_services.dart';
 
+import 'Pages/MAINPage.dart';
 import 'Pages/verifyemail.dart';
-import 'dialog_box/show_logout_dialog.dart';
-import 'firebase_options.dart';
 import 'Pages/login.dart';
 import 'Pages/register.dart';
-import 'dart:developer' as somename show log;
 import 'package:friends2/consts/routes.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await AuthServices.firebase().initialize();
   runApp(
     MaterialApp(
-      home: HomePage(),
+      home: MAINpage(),
       routes: {
-        loginView: (context) => const LoginPage(),
+        loginView: (context) => const LoginView(),
         registerView: (context) => const Register(),
         mainView: (context) => const MAINpage(),
         verifyView: (context) => const VerficationPage(),
@@ -24,8 +22,6 @@ void main() {
     ),
   );
 }
-
-enum MINEEE { logout }
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -38,16 +34,13 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform,
-      ),
+      future: AuthServices.firebase().initialize(),
       builder: (context, snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.done:
-            final user = FirebaseAuth.instance.currentUser;
-            print(user);
+            final user = AuthServices.firebase().currentUser;
             if (user != null) {
-              if (user.emailVerified) {
+              if (user.isEmailVerified) {
                 return const MAINpage();
               } else {
                 return const VerficationPage();
@@ -59,48 +52,6 @@ class _HomePageState extends State<HomePage> {
             return const Text("loading");
         }
       },
-    );
-  }
-}
-
-class MAINpage extends StatefulWidget {
-  const MAINpage({super.key});
-
-  @override
-  State<MAINpage> createState() => _MAINpageState();
-}
-
-class _MAINpageState extends State<MAINpage> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('MAIN UI'),
-        actions: [
-          PopupMenuButton<MINEEE>(
-            onSelected: (value) async {
-              switch (value) {
-                case MINEEE.logout:
-                  final somename1 = await showLogoutDialog(context);
-                  if (somename1) {
-                    FirebaseAuth.instance.signOut();
-                    Navigator.pushNamedAndRemoveUntil(
-                        context, '/login', (route) => false);
-                  }
-                  somename.log(somename1.toString());
-                  break;
-              }
-            },
-            itemBuilder: (context) {
-              return [
-                const PopupMenuItem<MINEEE>(
-                    value: MINEEE.logout, child: Text('Logout')),
-              ];
-            },
-          )
-        ],
-      ),
-      body: const Text('HEllo'),
     );
   }
 }
