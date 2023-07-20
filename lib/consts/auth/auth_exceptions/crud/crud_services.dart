@@ -5,14 +5,10 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 class NoteServices {
-
-
- static final NoteServices _shared = NoteServices._sharedInstance();
+  static final NoteServices _shared = NoteServices._sharedInstance();
   NoteServices._sharedInstance();
   factory NoteServices() => _shared;
 
-
-  
   List<DatabaseNote> _notes = [];
 
   final _notesStreamController =
@@ -52,7 +48,7 @@ class NoteServices {
   }
 
   Future<DatabaseUser> getOrCreateUser({required String email}) async {
-    final db = _getDatabaseOrThrow();
+    // final db = _getDatabaseOrThrow();
     await _ensureDbIsOpen();
 
     try {
@@ -150,7 +146,7 @@ class NoteServices {
     await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
     final count = await db
-        .query(userTable, where: 'email: ?', whereArgs: [email.toLowerCase()]);
+        .query(userTable, where: 'email:?', whereArgs: [email.toLowerCase()]);
     if (count.isEmpty) {
       throw UserNotFoundException;
     } else {
@@ -161,7 +157,7 @@ class NoteServices {
   Future<DatabaseUser> createUser({required String email}) async {
     final db = _getDatabaseOrThrow();
     final foundUsers = await db.query(userTable,
-        where: 'email: ?', limit: 1, whereArgs: [email.toLowerCase()]);
+        where: 'email:?', limit: 1, whereArgs: [email.toLowerCase()]);
     if (foundUsers.isNotEmpty) {
       throw UserAlreadyExists();
     }
@@ -173,7 +169,7 @@ class NoteServices {
     final db = _getDatabaseOrThrow();
     int deleted = await db.delete(
       userTable,
-      where: 'email: ?',
+      where: 'email:?',
       whereArgs: [email.toLowerCase()],
     );
     if (deleted != 1) {

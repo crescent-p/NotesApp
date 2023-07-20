@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:friends2/consts/routes.dart';
 import '../consts/auth/auth_exceptions/auth_services.dart';
 import '../dialog_box/show_login_error.dart';
-import '../firebase_options.dart';
 
 class Register extends StatefulWidget {
   const Register({super.key});

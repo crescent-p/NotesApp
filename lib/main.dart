@@ -1,13 +1,12 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:friends2/Pages/notes/note_view.dart';
 import 'package:friends2/consts/auth/auth_exceptions/auth_services.dart';
-
-import 'Pages/MAINPage.dart';
+import 'Pages/notes/newNote_view.dart';
 import 'Pages/verifyemail.dart';
 import 'Pages/login.dart';
 import 'Pages/register.dart';
 import 'package:friends2/consts/routes.dart';
-
 import 'firebase_options.dart';
 
 Future<void> main() async {
@@ -17,12 +16,14 @@ Future<void> main() async {
   );
   runApp(
     MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: LoginView(),
       routes: {
         loginView: (context) => const LoginView(),
         registerView: (context) => const Register(),
-        mainView: (context) => const MAINpage(),
         verifyView: (context) => const VerficationPage(),
+        noteView: (context) => const NoteView(),
+        newNoteView: (context) => const NewNoteView(),
       },
     ),
   );
@@ -46,7 +47,7 @@ class _HomePageState extends State<HomePage> {
             final user = AuthServices.firebase().currentUser;
             if (user != null) {
               if (user.isEmailVerified) {
-                return const MAINpage();
+                return const NoteView();
               } else {
                 return const VerficationPage();
               }

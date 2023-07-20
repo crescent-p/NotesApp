@@ -2,18 +2,19 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:friends2/consts/auth/auth_exceptions/auth_services.dart';
 import 'package:friends2/consts/auth/auth_exceptions/crud/crud_services.dart';
-import '../consts/routes.dart';
-import '../dialog_box/show_logout_dialog.dart';
-import '../enums/menu_action.dart';
+import 'package:friends2/consts/routes.dart';
+import 'package:friends2/dialog_box/show_logout_dialog.dart';
 
-class MAINpage extends StatefulWidget {
-  const MAINpage({super.key});
+import '../../enums/menu_action.dart';
+
+class NoteView extends StatefulWidget {
+  const NoteView({super.key});
 
   @override
-  State<MAINpage> createState() => _MAINpageState();
+  State<NoteView> createState() => _NoteViewState();
 }
 
-class _MAINpageState extends State<MAINpage> {
+class _NoteViewState extends State<NoteView> {
   late final NoteServices _noteServices;
   final userEmail = FirebaseAuth.instance.currentUser!.email!;
   @override
@@ -38,31 +39,37 @@ class _MAINpageState extends State<MAINpage> {
           switch (snapshot.connectionState) {
             case ConnectionState.done:
               return Scaffold(
+                
                 appBar: AppBar(
                   title: const Text('MAIN UI'),
-                  // actions: [
-                  //   PopupMenuButton<menuAction>(
-                  //     onSelected: (value) async {
-                  //       switch (value) {
-                  //         case menuAction.logout:
-                  //           final somename1 = await showLogoutDialog(context);
-                  //           if (somename1) {
-                  //             await AuthServices.firebase().initialize();
-                  //             AuthServices.firebase().logOut();
-                  //             Navigator.pushNamedAndRemoveUntil(
-                  //                 context, loginView, (route) => false);
-                  //           }
-                  //           break;
-                  //       }
-                  //     },
-                  //     itemBuilder: (context) {
-                  //       return [
-                  //         const PopupMenuItem<menuAction>(
-                  //             value: menuAction.logout, child: Text('Logout')),
-                  //       ];
-                  //     },
-                  //   )
-                  // ],
+                  actions: [
+                    IconButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, newNoteView);
+                        },
+                        icon: const Icon(Icons.add)),
+                    PopupMenuButton<menuAction>(
+                      onSelected: (value) async {
+                        switch (value) {
+                          case menuAction.logout:
+                            final somename1 = await showLogoutDialog(context);
+                            if (somename1 && context.mounted) {
+                              await AuthServices.firebase().initialize();
+                              await AuthServices.firebase().logOut();
+                              Navigator.pushNamedAndRemoveUntil(
+                                  context, loginView, (route) => false);
+                            }
+                            break;
+                        }
+                      },
+                      itemBuilder: (context) {
+                        return [
+                          const PopupMenuItem<menuAction>(
+                              value: menuAction.logout, child: Text('Logout')),
+                        ];
+                      },
+                    )
+                  ],
                 ),
                 body: FutureBuilder(
                   future: _noteServices.getOrCreateUser(email: userEmail),
@@ -73,6 +80,7 @@ class _MAINpageState extends State<MAINpage> {
                           stream: _noteServices.allNotes,
                           builder: (context, snapshot) {
                             switch (snapshot.connectionState) {
+                              case ConnectionState.active:
                               case ConnectionState.waiting:
                                 return const Text("waiting for data");
                               default:

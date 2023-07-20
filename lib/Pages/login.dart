@@ -1,10 +1,6 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:friends2/consts/routes.dart';
 import '../consts/auth/auth_exceptions/auth_services.dart';
-import '../consts/auth/auth_exceptions/login_exceptions.dart';
-import '../firebase_options.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({Key? key}) : super(key: key);
@@ -70,13 +66,13 @@ class _LoginViewState extends State<LoginView> {
                 if (user?.isEmailVerified ?? false) {
                   // user's email is verified
                   Navigator.of(context).pushNamedAndRemoveUntil(
-                    mainView,
+                    noteView,
                     (route) => false,
                   );
                 } else {
                   // user's email is NOT verified
                   Navigator.of(context).pushNamedAndRemoveUntil(
-                    verifyView,
+                    registerView,
                     (route) => false,
                   );
                 }

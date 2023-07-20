@@ -1,7 +1,4 @@
-import 'package:firebase_core/firebase_core.dart';
-import 'package:friends2/consts/auth/auth_exceptions/auth_provider.dart';
 import 'package:friends2/consts/auth/auth_exceptions/auth_user.dart';
-import 'package:friends2/firebase_options.dart';
 import 'firebase_auth_services.dart';
 
 class AuthServices implements FirebaseAuthProvider {
@@ -34,8 +31,8 @@ class AuthServices implements FirebaseAuthProvider {
   }
 
   @override
-  Future<void> logInUser(
+  Future<AuthUser> logInUser(
       {required String email, required String password}) async {
-    provider.logInUser(email: email, password: password);
+    return provider.logInUser(email: email, password: password);
   }
 }
