@@ -5,15 +5,17 @@ import 'package:flutter/material.dart';
 import 'package:friends2/consts/auth/auth_exceptions/auth_provider.dart';
 import 'package:friends2/consts/auth/auth_exceptions/auth_user.dart';
 import 'package:friends2/consts/auth/auth_exceptions/login_exceptions.dart';
-
-import '../../../dialog_box/show_login_error.dart';
 import '../../../firebase_options.dart';
-import 'auth_services.dart';
 
 class FirebaseAuthProvider implements AuthProvider {
   @override
-  //returns AuthUser, the AuthUser.isEmailVerified function can be used
-  //to get the email verification status.
+  Future<void> initialize() async {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  }
+
+  @override
   AuthUser? get currentUser {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
@@ -38,7 +40,6 @@ class FirebaseAuthProvider implements AuthProvider {
         throw UserNotLoggedIn();
       }
     } catch (_) {
-      print(_);
       throw Exception();
     }
   }
@@ -59,7 +60,7 @@ class FirebaseAuthProvider implements AuthProvider {
 
   @override
   Future<void> sendEmailVerificaton() async {
-    final user = FirebaseAuth.instance.currentUser;
+    final user = await FirebaseAuth.instance.currentUser;
     if (user != null) {
       user.sendEmailVerification();
     } else {
@@ -68,22 +69,15 @@ class FirebaseAuthProvider implements AuthProvider {
   }
 
   @override
-  Future<void> initialize() async {
-    WidgetsFlutterBinding.ensureInitialized();
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-  }
-
-  @override
   Future<void> logInUser(
       {required String email, required String password}) async {
-    final user = FirebaseAuthProvider().currentUser;
+    final user = await FirebaseAuth.instance.currentUser;
     if (user != null) {
       try {
         await FirebaseAuth.instance
             .signInWithEmailAndPassword(email: email, password: password);
       } catch (e) {
+        print(e);
         throw Exception();
       }
     } else {
