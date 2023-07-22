@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:friends2/Pages/notes/note_list_view.dart';
 import 'package:friends2/consts/auth/auth_exceptions/auth_services.dart';
 import 'package:friends2/consts/auth/auth_exceptions/crud/crud_services.dart';
 import 'package:friends2/consts/routes.dart';
@@ -26,12 +27,6 @@ class _NoteViewState extends State<NoteView> {
   }
 
   @override
-  void dispose() {
-    _noteServices.close();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return FutureBuilder(
         future: AuthServices.firebase().initialize(),
@@ -39,9 +34,8 @@ class _NoteViewState extends State<NoteView> {
           switch (snapshot.connectionState) {
             case ConnectionState.done:
               return Scaffold(
-                
                 appBar: AppBar(
-                  title: const Text('MAIN UI'),
+                  title: const Text('Note View'),
                   actions: [
                     IconButton(
                         onPressed: () {
@@ -52,7 +46,8 @@ class _NoteViewState extends State<NoteView> {
                       onSelected: (value) async {
                         switch (value) {
                           case menuAction.logout:
-                            final somename1 = await showLogoutDialog(context);
+                            final somename1 =
+                                await showLogoutMessage(context: context);
                             if (somename1 && context.mounted) {
                               await AuthServices.firebase().initialize();
                               await AuthServices.firebase().logOut();
@@ -82,9 +77,20 @@ class _NoteViewState extends State<NoteView> {
                             switch (snapshot.connectionState) {
                               case ConnectionState.active:
                               case ConnectionState.waiting:
-                                return const Text("waiting for data");
+                                if (snapshot.hasData) {
+                                  final allNotes =
+                                      snapshot.data as List<DatabaseNote>;
+                                 return NoteListView(
+                                    notes: allNotes,
+                                    onDeleteNote: (note) async{
+                                      await _noteServices.deleteNote(id: note.id);
+                                    },
+                                  );
+                                } else {
+                                  return CircularProgressIndicator();
+                                }
                               default:
-                                return const Text("done");
+                                return CircularProgressIndicator();
                             }
                           },
                         );

@@ -6,15 +6,21 @@ import 'package:sqflite/sqflite.dart';
 
 class NoteServices {
   static final NoteServices _shared = NoteServices._sharedInstance();
-  NoteServices._sharedInstance();
+
   factory NoteServices() => _shared;
 
-  List<DatabaseNote> _notes = [];
+  late final StreamController<List<DatabaseNote>> _notesStreamController;
 
-  final _notesStreamController =
-      StreamController<List<DatabaseNote>>.broadcast();
+  NoteServices._sharedInstance() {
+    _notesStreamController =
+        StreamController<List<DatabaseNote>>.broadcast(onListen: () {
+      _notesStreamController.sink.add(_notes);
+    });
+  }
 
   Stream<List<DatabaseNote>> get allNotes => _notesStreamController.stream;
+
+  List<DatabaseNote> _notes = [];
 
   Database? _db;
   Future<Iterable<DatabaseNote>> getAllNotes() async {
@@ -39,7 +45,7 @@ class NoteServices {
 
     final db = _getDatabaseOrThrow();
     final nosDeleted =
-        await db.delete(notesTable, where: 'user_id: ?', whereArgs: [id]);
+        await db.delete(notesTable, where: 'user_id= ?', whereArgs: [id]);
     if (nosDeleted == 0) {
       throw NoteNotDeleted;
     } else {
@@ -81,7 +87,7 @@ class NoteServices {
       textColoumn: text,
       syncedOrNotColoumn: false,
     });
-    if (updatedNotes != 0) {
+    if (updatedNotes == 0) {
       throw CouldNotUpdateNote();
     } else {
       final notes = await getNote(id: note.id);
@@ -97,7 +103,7 @@ class NoteServices {
     await _ensureDbIsOpen();
 
     final note =
-        await db.query(notesTable, where: 'id:? ', whereArgs: [id], limit: 1);
+        await db.query(notesTable, where: 'id=? ', whereArgs: [id], limit: 1);
     if (note.isEmpty) {
       throw CouldNotFindNote();
     } else {
@@ -146,7 +152,7 @@ class NoteServices {
     await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
     final count = await db
-        .query(userTable, where: 'email:?', whereArgs: [email.toLowerCase()]);
+        .query(userTable, where: 'email=?', whereArgs: [email.toLowerCase()]);
     if (count.isEmpty) {
       throw UserNotFoundException;
     } else {
@@ -157,7 +163,7 @@ class NoteServices {
   Future<DatabaseUser> createUser({required String email}) async {
     final db = _getDatabaseOrThrow();
     final foundUsers = await db.query(userTable,
-        where: 'email:?', limit: 1, whereArgs: [email.toLowerCase()]);
+        where: 'email= ?', limit: 1, whereArgs: [email.toLowerCase()]);
     if (foundUsers.isNotEmpty) {
       throw UserAlreadyExists();
     }
@@ -169,7 +175,7 @@ class NoteServices {
     final db = _getDatabaseOrThrow();
     int deleted = await db.delete(
       userTable,
-      where: 'email:?',
+      where: 'email= ?',
       whereArgs: [email.toLowerCase()],
     );
     if (deleted != 1) {
@@ -206,6 +212,7 @@ class NoteServices {
       _db = db;
       await db.execute(createUserTable);
       await db.execute(createNoteTable);
+      await _cacheAllNotes();
     } on MissingPlatformDirectoryException {
       throw PathNotFound;
     }
@@ -247,27 +254,26 @@ class DatabaseNote {
   bool operator ==(covariant DatabaseNote other) => id == other.id;
 
   @override
-  // TODO: implement hashCode
   int get hashCode => id.hashCode;
 }
 
 const userTable = 'user';
-const notesTable = 'notes';
+const notesTable = 'note';
 const name = 'notes.db';
-const idColumn = 'ID';
+const idColumn = 'id';
 const emailColumn = 'email';
 const syncedOrNotColoumn = 'is_synced_with_server';
 const userColoumnId = 'user_id';
 const textColoumn = 'text';
-const createUserTable = '''CREATE TABLE IF NOT EXISTS "User" (
-	"ID"	INTEGER,
+const createUserTable = '''CREATE TABLE IF NOT EXISTS"user" (
+	"id"	INTEGER,
 	"email"	TEXT NOT NULL UNIQUE,
-	PRIMARY KEY("ID")
-);''';
-const createNoteTable = ''' CREATE TABLE IF NOT EXISTS "NOTE" (
+	PRIMARY KEY("id")
+)''';
+const createNoteTable = '''CREATE TABLE IF NOT EXISTS "note" (
 	"id"	INTEGER NOT NULL,
 	"user_id"	INTEGER,
-	"text"	INTEGER,
+	"text"	TEXT,
 	"is_synced_with_server"	INTEGER,
 	PRIMARY KEY("id" AUTOINCREMENT)
 );''';

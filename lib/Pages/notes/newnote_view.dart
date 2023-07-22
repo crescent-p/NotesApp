@@ -1,6 +1,3 @@
-import 'dart:io';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:friends2/consts/auth/auth_exceptions/auth_services.dart';
 import 'package:friends2/consts/auth/auth_exceptions/crud/crud_services.dart';
@@ -26,8 +23,9 @@ class _NewNoteViewState extends State<NewNoteView> {
 
   @override
   void dispose() {
-    _deleteNoteIfTextIsEmpty();
     _saveNoteIfNoteNotEmpty();
+    _deleteNoteIfTextIsEmpty();
+
     _textEditingController.dispose();
     super.dispose();
   }
@@ -39,6 +37,7 @@ class _NewNoteViewState extends State<NewNoteView> {
     } else {
       final currentUser = AuthServices.firebase().currentUser!;
       final email = currentUser.email!;
+      print(email);
       final owner = await _noteServices.createUser(email: email);
       return await _noteServices.createNote(owner: owner);
     }
@@ -89,6 +88,7 @@ class _NewNoteViewState extends State<NewNoteView> {
           switch (snapshot.connectionState) {
             case ConnectionState.done:
               _note = snapshot.data;
+              print(_note);
               _setupTextControllerListner();
               return TextField(
                 controller: _textEditingController,

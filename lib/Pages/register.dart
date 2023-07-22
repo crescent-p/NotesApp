@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:friends2/consts/routes.dart';
+import 'package:friends2/dialog_box/show_error_dialog.dart';
 import '../consts/auth/auth_exceptions/auth_services.dart';
-import '../dialog_box/show_login_error.dart';
 
 class Register extends StatefulWidget {
   const Register({super.key});
@@ -74,7 +74,8 @@ class _RegisterState extends State<Register> {
                                 .sendEmailVerificaton();
                             Navigator.pushNamed(context, verifyView);
                           } catch (e) {
-                            showLoginError(context, e.toString());
+                            showErrorDialog(
+                                content: e.toString(), context: context);
                           }
                         },
                         child: const Text('Register'),

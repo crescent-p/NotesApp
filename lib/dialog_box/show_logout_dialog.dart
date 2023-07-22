@@ -1,25 +1,13 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:friends2/dialog_box/generic_dialog_box.dart';
 
-Future<bool> showLogoutDialog(BuildContext context) {
-  return showDialog<bool>(
-      context: context,
-      builder: (context) {
-        return CupertinoAlertDialog(
-          title: const Text('Sure??'),
-          content: const Text('Do you reallyyyy wanna log out?'),
-          actions: [
-            TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop(true);
-                },
-                child: const Text('Yes')),
-            TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop(false);
-                },
-                child: const Text("no"))
-          ],
-        );
-      }).then((value) => value ?? false);
+Future<bool> showLogoutMessage({required BuildContext context}) {
+  return showGenericDialog<bool>(
+    context: context,
+    content: "Do you wanna LogOut?",
+    title: "Logout",
+    optionBuilder: () {
+      return {'yes': true, 'no': false};
+    },
+  ).then((value) => value ?? false);
 }
