@@ -8,4 +8,4 @@ const verifyView = '/verify';
 const mainView = '/main';
 
 const noteView = '/notes';
-const newNoteView = '/notes/new';
+const createUpdateNoteView = '/notes/new';

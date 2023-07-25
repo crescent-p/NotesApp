@@ -1,4 +1,4 @@
-import 'package:firebase_core/firebase_core.dart';
+
 import 'package:friends2/consts/auth/auth_exceptions/auth_user.dart';
 
 abstract class AuthProvider {

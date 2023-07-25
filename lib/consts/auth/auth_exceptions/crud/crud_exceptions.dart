@@ -27,3 +27,4 @@ class UserNotFoundException implements Exception {}
 class NoteNotDeleted implements Exception {}
 
 class NoNotesFound implements Exception {}
+class CreateUserBeforeCreatingNote implements Exception{}

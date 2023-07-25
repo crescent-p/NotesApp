@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:friends2/Pages/notes/note_list_view.dart';
+import 'package:friends2/Pages/notes/update_create_note_view.dart';
 import 'package:friends2/consts/auth/auth_exceptions/auth_services.dart';
 import 'package:friends2/consts/auth/auth_exceptions/crud/crud_services.dart';
 import 'package:friends2/consts/routes.dart';
@@ -21,7 +22,7 @@ class _NoteViewState extends State<NoteView> {
   @override
   void initState() {
     _noteServices = NoteServices();
-    //_noteServices.open();
+    // _noteServices.open();
     //we will ensure db is open in every function before using it so we don't need to use this.
     super.initState();
   }
@@ -39,7 +40,7 @@ class _NoteViewState extends State<NoteView> {
                   actions: [
                     IconButton(
                         onPressed: () {
-                          Navigator.pushNamed(context, newNoteView);
+                          Navigator.pushNamed(context, createUpdateNoteView);
                         },
                         icon: const Icon(Icons.add)),
                     PopupMenuButton<menuAction>(
@@ -80,28 +81,34 @@ class _NoteViewState extends State<NoteView> {
                                 if (snapshot.hasData) {
                                   final allNotes =
                                       snapshot.data as List<DatabaseNote>;
-                                 return NoteListView(
+                                  return NoteListView(
                                     notes: allNotes,
-                                    onDeleteNote: (note) async{
-                                      await _noteServices.deleteNote(id: note.id);
+                                    onDeleteNote: (note) async {
+                                      await _noteServices.deleteNote(
+                                          id: note.id);
+                                    },
+                                    onTap: (note) {
+                                      Navigator.of(context).pushNamed(
+                                          createUpdateNoteView,
+                                          arguments: note);
                                     },
                                   );
                                 } else {
-                                  return CircularProgressIndicator();
+                                  return const CircularProgressIndicator();
                                 }
                               default:
-                                return CircularProgressIndicator();
+                                return const CircularProgressIndicator();
                             }
                           },
                         );
                       default:
-                        return Text('ok');
+                        return const CircularProgressIndicator();
                     }
                   },
                 ),
               );
             default:
-              return Text('done');
+              return const Text('done');
           }
         });
   }

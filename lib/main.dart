@@ -2,7 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:friends2/Pages/notes/note_view.dart';
 import 'package:friends2/consts/auth/auth_exceptions/auth_services.dart';
-import 'Pages/notes/newNote_view.dart';
+import 'Pages/notes/update_create_note_view.dart';
 import 'Pages/verifyemail.dart';
 import 'Pages/login.dart';
 import 'Pages/register.dart';
@@ -23,7 +23,7 @@ Future<void> main() async {
         registerView: (context) => const Register(),
         verifyView: (context) => const VerficationPage(),
         noteView: (context) => const NoteView(),
-        newNoteView: (context) => const NewNoteView(),
+        createUpdateNoteView: (context) => const CreateUpdateNoteView(),
       },
     ),
   );

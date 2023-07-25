@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:friends2/consts/auth/auth_exceptions/crud/crud_exceptions.dart';
+import 'package:friends2/extensions/list/stream.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
@@ -8,9 +9,6 @@ class NoteServices {
   static final NoteServices _shared = NoteServices._sharedInstance();
 
   factory NoteServices() => _shared;
-
-  late final StreamController<List<DatabaseNote>> _notesStreamController;
-
   NoteServices._sharedInstance() {
     _notesStreamController =
         StreamController<List<DatabaseNote>>.broadcast(onListen: () {
@@ -18,9 +16,21 @@ class NoteServices {
     });
   }
 
-  Stream<List<DatabaseNote>> get allNotes => _notesStreamController.stream;
+  late final StreamController<List<DatabaseNote>> _notesStreamController;
+
+  Stream<List<DatabaseNote>> get allNotes {
+    return _notesStreamController.stream.filter((note) {
+      final currentUser = _user;
+      if (currentUser != null) {
+        return currentUser.id == note.userId;
+      } else {
+        throw CreateUserBeforeCreatingNote;
+      }
+    });
+  }
 
   List<DatabaseNote> _notes = [];
+  DatabaseUser? _user;
 
   Database? _db;
   Future<Iterable<DatabaseNote>> getAllNotes() async {
@@ -53,14 +63,26 @@ class NoteServices {
     }
   }
 
-  Future<DatabaseUser> getOrCreateUser({required String email}) async {
+  Future<DatabaseUser> getOrCreateUser({
+    required String email,
+    bool setAsCurrentUser = true,
+  }) async {
     // final db = _getDatabaseOrThrow();
     await _ensureDbIsOpen();
 
     try {
-      return await findUser(email: email);
+      final user = await findUser(email: email);
+      if (setAsCurrentUser) {
+        _user = user;
+      }
+      return user;
     } on UserNotFoundException {
-      return await createUser(email: email);
+      final user = await createUser(email: email);
+      if (setAsCurrentUser) {
+        _user = user;
+      }
+      _user = user;
+      return user;
     } catch (e) {
       rethrow;
     }
@@ -83,10 +105,14 @@ class NoteServices {
     await getNote(id: note.id);
     await _ensureDbIsOpen();
 
-    final updatedNotes = await db.update(notesTable, {
-      textColoumn: text,
-      syncedOrNotColoumn: false,
-    });
+    final updatedNotes = await db.update(
+        notesTable,
+        {
+          textColoumn: text,
+          syncedOrNotColoumn: false,
+        },
+        where: 'id= ?',
+        whereArgs: [note.id]);
     if (updatedNotes == 0) {
       throw CouldNotUpdateNote();
     } else {
@@ -122,6 +148,7 @@ class NoteServices {
     // make sure owner exists in the database with the correct id
     final dbUser = await findUser(email: owner.email);
     if (dbUser != owner) {
+      print('could not find user');
       throw CouldNotFindUser();
     }
 
@@ -135,7 +162,7 @@ class NoteServices {
 
     _notes.add(note);
     _notesStreamController.add(_notes);
-
+    // print(note.notes);
     return note;
   }
 
@@ -165,7 +192,7 @@ class NoteServices {
     final foundUsers = await db.query(userTable,
         where: 'email= ?', limit: 1, whereArgs: [email.toLowerCase()]);
     if (foundUsers.isNotEmpty) {
-      throw UserAlreadyExists();
+      return findUser(email: email);
     }
     final userId = await db.insert(userTable, {emailColumn: email});
     return DatabaseUser(id: userId, email: email);
@@ -255,6 +282,11 @@ class DatabaseNote {
 
   @override
   int get hashCode => id.hashCode;
+
+  @override
+  String toString() {
+    return 'ID: $id, note: $notes';
+  }
 }
 
 const userTable = 'user';
