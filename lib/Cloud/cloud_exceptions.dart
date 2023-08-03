@@ -13,3 +13,5 @@ class CouldNotReadNoteException extends CloudStorageExceptions{}
 class CouldNotDeleteNote extends CloudStorageExceptions{}
 
 class CouldNotDeleteAllNote extends CloudStorageExceptions{}
+
+class CouldNotUpdateNote extends CloudStorageExceptions{}

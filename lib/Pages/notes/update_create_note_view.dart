@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:friends2/consts/auth/auth_exceptions/auth_services.dart';
-import 'package:friends2/consts/auth/auth_exceptions/crud/crud_services.dart';
 import 'package:friends2/utilities/get_arguments.dart';
+import 'package:friends2/Cloud/cloud_note.dart';
+import 'package:friends2/Cloud/firebase_cloud_storage.dart';
+import 'package:friends2/Cloud/cloud_exceptions.dart';
+import 'package:share_plus/share_plus.dart';
+
+import '../../dialog_box/show_cannotshareemptydialog.dart';
 
 class CreateUpdateNoteView extends StatefulWidget {
   const CreateUpdateNoteView({super.key});
@@ -11,13 +16,13 @@ class CreateUpdateNoteView extends StatefulWidget {
 }
 
 class _CreateUpdateNoteViewState extends State<CreateUpdateNoteView> {
-  DatabaseNote? _note;
-  late final NoteServices _noteServices;
+  CloudNote? _note;
+  late final FirebaseCloudStorage _noteServices;
   late final TextEditingController _textEditingController;
 
   @override
   void initState() {
-    _noteServices = NoteServices();
+    _noteServices = FirebaseCloudStorage();
     _textEditingController = TextEditingController();
     super.initState();
   }
@@ -31,11 +36,11 @@ class _CreateUpdateNoteViewState extends State<CreateUpdateNoteView> {
     super.dispose();
   }
 
-  Future<DatabaseNote> createOrUpdateNote(BuildContext context) async {
-    final args = context.getArgument<DatabaseNote>();
+  Future<CloudNote> createOrUpdateNote(BuildContext context) async {
+    final args = context.getArgument<CloudNote>();
     if (args != null) {
       _note = args;
-      _textEditingController.text = args.notes;
+      _textEditingController.text = args.text;
       return args;
     }
 
@@ -44,12 +49,11 @@ class _CreateUpdateNoteViewState extends State<CreateUpdateNoteView> {
       return existingNote;
     } else {
       final currentUser = AuthServices.firebase().currentUser!;
-      final email = currentUser.email;
 // #TODO these two functions not working
-      final owner = await _noteServices.getOrCreateUser(email: email);
-      final note = await _noteServices.createNote(owner: owner);
-
+      final userId = currentUser.id;
+      final note = await _noteServices.createNewNote(ownerUserId: userId);
       _note = note;
+
       return note;
     }
   }
@@ -62,15 +66,15 @@ class _CreateUpdateNoteViewState extends State<CreateUpdateNoteView> {
       return;
     } else {
       final text = _textEditingController.text;
-      _noteServices.updateNote(note: note, text: text);
+      _noteServices.updateNote(
+        text: text,
+        documentId: note.documentId,
+      );
       // print(_textEditingController.text);
     }
   }
 
   void _setupTextControllerListner() async {
-    final owner =
-        await _noteServices.getOrCreateUser(email: 'crescent.appu@gmail.com');
-    _note = await _noteServices.createNote(owner: owner);
     _textEditingController.removeListener(() {
       _textControllerListner();
     });
@@ -83,7 +87,7 @@ class _CreateUpdateNoteViewState extends State<CreateUpdateNoteView> {
   void _deleteNoteIfTextIsEmpty() async {
     final note = _note;
     if (_textEditingController.text.isEmpty && note != null) {
-      await _noteServices.deleteNote(id: note.id);
+      await _noteServices.deleteNote(documnetId: note.documentId);
     }
   }
 
@@ -92,14 +96,28 @@ class _CreateUpdateNoteViewState extends State<CreateUpdateNoteView> {
     final note = _note;
 
     if (note != null && _textEditingController.text.isNotEmpty) {
-      await _noteServices.updateNote(note: note, text: text);
+      await _noteServices.updateNote(documentId: note.documentId, text: text);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('NewNote')),
+      appBar: AppBar(
+        title: const Text('NewNote'),
+        actions: [
+          IconButton(
+              onPressed: () async {
+                final text = _textEditingController.text;
+                if (text.isEmpty || _note == null) {
+                  await cannotShareEmptyText(context: context);
+                } else {
+                  Share.share(text);
+                }
+              },
+              icon: const Icon(Icons.share))
+        ],
+      ),
       body: FutureBuilder(
         future: createOrUpdateNote(context),
         builder: (context, snapshot) {
@@ -115,7 +133,7 @@ class _CreateUpdateNoteViewState extends State<CreateUpdateNoteView> {
                     const InputDecoration(hintText: "type your notes here"),
               );
             default:
-              return CircularProgressIndicator();
+              return const CircularProgressIndicator();
           }
         },
       ),

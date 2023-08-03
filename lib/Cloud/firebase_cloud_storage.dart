@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:friends2/Cloud/cloud_note.dart';
 import 'package:friends2/Cloud/cloud_storage_consts.dart';
-import 'package:friends2/consts/auth/auth_exceptions/crud/crud_exceptions.dart';
+import 'cloud_exceptions.dart';
 
 class FirebaseCloudStorage {
   final notes = FirebaseFirestore.instance.collection('notes');
@@ -21,21 +21,23 @@ class FirebaseCloudStorage {
   }
 
   Future<void> updateNote({
-    required String noteId,
+    required String documentId,
     required String text,
   }) async {
     try {
-      await notes.doc(noteId).update({textFieldName: text});
+      await notes.doc(documentId).update({textFieldName: text});
     } catch (e) {
       throw CouldNotUpdateNote();
     }
   }
 
-  void createNewNote({required String ownerUserId}) async {
-    await notes.add({
+  Future<CloudNote> createNewNote({required String ownerUserId}) async {
+    final documentReference = await notes.add({
       ownerUserIdFieldName: ownerUserId,
       textFieldName: '',
     });
+    final note = await documentReference.get();
+    return CloudNote(ownerUserId: ownerUserId, documentId: note.id, text: '');
   }
 
   void getNotes({required String ownerUserId}) async {
