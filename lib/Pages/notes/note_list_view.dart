@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:friends2/Cloud/cloud_note.dart';
 import 'package:friends2/Pages/notes/show_delete_dialog.dart';
-import 'package:friends2/consts/auth/auth_exceptions/crud/crud_services.dart';
 
-import '../../consts/routes.dart';
 
 typedef NoteCallback = void Function(CloudNote note);
 

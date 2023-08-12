@@ -1,5 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:friends2/consts/auth/auth_exceptions/bloc/auth_bloc.dart';
+import 'package:friends2/consts/auth/auth_exceptions/bloc/auth_event.dart';
 import 'package:friends2/consts/routes.dart';
 
 import '../consts/auth/auth_exceptions/auth_services.dart';
@@ -24,14 +27,14 @@ class _VerficationPageState extends State<VerficationPage> {
               "If you haven't received an email click the button below."),
           TextButton(
               onPressed: () {
-                AuthServices.firebase().sendEmailVerificaton();
+                context
+                    .read<AuthBloc>()
+                    .add(const AuthEventSendEmailVerification());
               },
               child: const Text('Resend Email Verification')),
           TextButton(
             onPressed: () {
-              AuthServices.firebase().logOut();
-              Navigator.pushNamedAndRemoveUntil(
-                  context, registerView, (route) => false);
+              context.read<AuthBloc>().add(const AuthEventLogout());
             },
             child: const Text('Restart'),
           ),

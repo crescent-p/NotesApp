@@ -1,14 +1,13 @@
-import 'dart:html';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:friends2/Loading/loading_screen.dart';
 import 'package:friends2/Pages/notes/note_view.dart';
-import 'package:friends2/consts/auth/auth_exceptions/auth_services.dart';
 import 'package:friends2/consts/auth/auth_exceptions/bloc/auth_bloc.dart';
 import 'package:friends2/consts/auth/auth_exceptions/bloc/auth_event.dart';
 import 'package:friends2/consts/auth/auth_exceptions/bloc/auth_state.dart';
 import 'package:friends2/consts/auth/auth_exceptions/firebase_auth_services.dart';
 import 'Pages/notes/update_create_note_view.dart';
+import 'Pages/reset.dart';
 import 'Pages/verifyemail.dart';
 import 'Pages/login.dart';
 import 'Pages/register.dart';
@@ -24,10 +23,6 @@ void main() {
         child: const HomePage(),
       ),
       routes: {
-        loginView: (context) => const LoginView(),
-        registerView: (context) => const Register(),
-        verifyView: (context) => const VerficationPage(),
-        noteView: (context) => const NoteView(),
         createUpdateNoteView: (context) => const CreateUpdateNoteView(),
       },
     ),
@@ -45,7 +40,17 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     context.read<AuthBloc>().add(const AuthEventInitialize());
-    return BlocBuilder<AuthBloc, AuthState>(
+    return BlocConsumer<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state.isLoading) {
+          LoadingScreen().show(
+            context: context,
+            text: state.loadingText ?? "Loading Please Wait",
+          );
+        } else {
+          LoadingScreen().hide();
+        }
+      },
       builder: (context, state) {
         if (state is AuthStateLoggedIn) {
           return const NoteView();
@@ -53,8 +58,16 @@ class _HomePageState extends State<HomePage> {
           return const LoginView();
         } else if (state is AuthStateNeedsVerification) {
           return const VerficationPage();
+        } else if (state is AuthStateRegistering) {
+          return const Register();
+        } else if (state is AuthStateRegister) {
+          return const Register();
+        } else if (state is AuthStateResetPassword) {
+          return const ResetPage();
         } else {
-          return const CircularProgressIndicator();
+          return const Scaffold(
+            body: CircularProgressIndicator(),
+          );
         }
       },
     );

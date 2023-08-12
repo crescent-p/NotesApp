@@ -3,7 +3,6 @@ import 'package:friends2/consts/auth/auth_exceptions/auth_services.dart';
 import 'package:friends2/utilities/get_arguments.dart';
 import 'package:friends2/Cloud/cloud_note.dart';
 import 'package:friends2/Cloud/firebase_cloud_storage.dart';
-import 'package:friends2/Cloud/cloud_exceptions.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../dialog_box/show_cannotshareemptydialog.dart';

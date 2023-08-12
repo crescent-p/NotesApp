@@ -1,8 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/rendering.dart';
 import 'package:friends2/consts/auth/auth_exceptions/auth_provider.dart';
 import 'package:friends2/consts/auth/auth_exceptions/auth_user.dart';
 import 'package:friends2/consts/auth/auth_exceptions/login_exceptions.dart';
+import 'package:path/path.dart';
 import '../../../firebase_options.dart';
 
 class FirebaseAuthProvider implements AuthProvider {
@@ -70,7 +72,7 @@ class FirebaseAuthProvider implements AuthProvider {
 
   @override
   Future<void> sendEmailVerificaton() async {
-    final user =  FirebaseAuth.instance.currentUser;
+    final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       user.sendEmailVerification();
     } else {
@@ -101,6 +103,24 @@ class FirebaseAuthProvider implements AuthProvider {
         throw WrongPasswordAuthException();
       } else {
         throw GenericAuthException();
+      }
+    } catch (_) {
+      throw GenericAuthException();
+    }
+  }
+
+  @override
+  Future<void> sendPasswordReset({required String email}) async {
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+    } on FirebaseAuthException catch (e) {
+      switch (e.code) {
+        case "auth/invalid-email":
+          throw InvalidEmailAuthException();
+        case "auth/user-not-found":
+          throw UserNotFoundAuthException();
+        default:
+          throw GenericAuthException();
       }
     } catch (_) {
       throw GenericAuthException();

@@ -1,4 +1,3 @@
-
 import 'package:friends2/consts/auth/auth_exceptions/auth_user.dart';
 
 abstract class AuthProvider {
@@ -9,6 +8,7 @@ abstract class AuthProvider {
     required String password,
   });
   Future<void> logOut();
+  Future<void> sendPasswordReset({required String email});
   Future<void> sendEmailVerificaton();
   Future<AuthUser> logInUser({
     required String email,
